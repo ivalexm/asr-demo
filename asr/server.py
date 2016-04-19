@@ -12,7 +12,8 @@ WAV_FILE_DIR = '/tmp/test-asr'
 DECODER_PATH = '/decoder'
 
 WAV_DIR = Path(WAV_FILE_DIR)
-WAV_DIR.mkdir(exist_ok=True)
+if not WAV_DIR.exists():
+    WAV_DIR.mkdir()
 
 LOG = logging.getLogger(__name__)
 

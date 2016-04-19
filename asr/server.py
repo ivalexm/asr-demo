@@ -1,10 +1,12 @@
+import json
 import logging
 import uuid
 from pathlib import Path
 
 import tornado.web
+from tornado.ioloop import IOLoop
 
-from .decode import schedule_decode
+from .decode import schedule_decode, get_task, push_task
 
 WAV_FILE_DIR = '/tmp/test-asr'
 DECODER_PATH = '/decoder'
@@ -20,18 +22,25 @@ class MainHandler(tornado.web.RequestHandler):
         self.write('Hello, world.')
 
 
-class AsrHandler(tornado.web.RequestHandler):
+class TaskHandler(tornado.web.RequestHandler):
+    def get(self, task_id):
+        self.write(
+            json.dumps(get_task(task_id).to_dict(), ensure_ascii=False)
+        )
+
     def post(self):
-        asr_id = str(uuid.uuid1())
-        wav_file = WAV_DIR / ('%s.wav' % asr_id)
+        task_id = str(uuid.uuid1())
+        push_task(task_id)
+
+        wav_file = WAV_DIR / ('%s.wav' % task_id)
 
         LOG.info('file received: %s' % wav_file)
 
         with wav_file.open(mode='bw+') as output:
             output.write(self.request.files['wav'][0]['body'])
 
-        result = schedule_decode(asr_id, wav_file)
+        IOLoop.current().spawn_callback(schedule_decode, task_id, wav_file)
 
         LOG.info('file decoded: %s' % wav_file)
 
-        self.write(result)
+        self.write({'id': task_id})

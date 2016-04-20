@@ -1,12 +1,49 @@
 <head>
     <title>ThoughtWorks ASR Demo</title>
+    <script src="http://upcdn.b0.upaiyun.com/libs/jquery/jquery-2.0.3.min.js" type="application/javascript"></script>
 </head>
 
 <body>
-<form action="tasks" method="POST" enctype="multipart/form-data">
+<form enctype="multipart/form-data">
     <label for="wav">Select File</label>
     <input id="wav" type="file" name="wav">
-    <input type="submit" name="submit" value="Submit">
+    <input type="button" name="submit" value="Submit">
 </form>
+<div id="task-result">
+</div>
+<script>
+    $(':button').click(function (e) {
+        var formData = new FormData($('form')[0]);
+        $.ajax({
+                    url: '/tasks',  //Server script to process data
+                    type: 'POST',
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false
+                })
+                .done(function (data) {
+                    function getStatus(id) {
+                        $.get('/tasks/' + id)
+                                .done(function (data) {
+                                    var result = $.parseJSON(data);
+                                    if (result.status == 'pending') {
+                                        $('#task-result').text("processing");
+                                        setTimeout(function () {
+                                            getStatus(id)
+                                        }, 5000);
+                                    } else {
+                                        $('#task-result').text(result.result);
+                                    }
+                                })
+                    }
+
+                    getStatus(data.id);
+                })
+                .error(function (error) {
+                    $('#task-result').text(error);
+                });
+    })
+</script>
 </body>
 

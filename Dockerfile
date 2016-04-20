@@ -61,7 +61,8 @@ RUN apt-get install -y \
     python3.4 \
     python3-pip \
     nginx && \
-    pip3 install tornado
+    pip3 install tornado && \
+    rm -f /etc/nginx/sites-available/default
 
 ENV KALDI_SCRIPT_DIR=/opt/kaldi/egs/twasr-thchs30/s5
 

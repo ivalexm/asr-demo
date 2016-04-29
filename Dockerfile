@@ -1,5 +1,5 @@
 FROM debian:8
-MAINTAINER Eduardo Silva <zedudu@gmail.com>
+MAINTAINER Tong Da <tongda@outlook.com>
 
 RUN apt-get update && apt-get install -y  \
     autoconf \
@@ -69,11 +69,12 @@ ENV KALDI_SCRIPT_DIR=/opt/kaldi/egs/twasr-thchs30/s5
 COPY asr asr-demo/asr/
 COPY main.py asr-demo/
 COPY conf/nginx/test-asr.conf /etc/nginx/conf.d/
+COPY conf/*.pem /etc/nginx/certs/
 COPY index.html /usr/share/nginx/asr-demo/
 COPY model/final.mdl /opt/kaldi/egs/twasr-thchs30/s5/exp/mono/
 COPY model/HCLG.fst /opt/kaldi/egs/twasr-thchs30/s5/exp/mono/graph/
 COPY model/words.txt /opt/kaldi/egs/twasr-thchs30/s5/exp/mono/graph/
 
-EXPOSE 8080
+EXPOSE 8080 8443
 
 CMD nginx && python3.4 asr-demo/main.py
